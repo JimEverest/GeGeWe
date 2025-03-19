@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .message-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .test-form {
+            margin-bottom: 20px;
+        }
+        .test-form div {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket测试</h1>
+    
+    <div>
+        <h2>WebSocket连接状态: <span id="connectionStatus">未连接</span></h2>
+        <button onclick="connectWebSocket()">连接WebSocket</button>
+        <button onclick="disconnectWebSocket()">断开连接</button>
+    </div>
+    
+    <h2>接收到的消息</h2>
+    <div class="message-container" id="messageContainer"></div>
+    
+    <div class="test-form">
+        <h2>测试消息发送</h2>
+        <div>
+            <label>发送者ID:</label>
+            <input type="text" id="testFromWxid" value="wxid_sender">
+        </div>
+        <div>
+            <label>接收者ID:</label>
+            <input type="text" id="testToWxid" value="wxid_receiver">
+        </div>
+        <div>
+            <label>消息内容:</label>
+            <input type="text" id="testContent" value="这是一条测试消息">
+        </div>
+        <button onclick="sendTestMessage()">发送测试消息</button>
+    </div>
+    
+    <div class="test-form">
+        <h2>测试回调</h2>
+        <button onclick="testCallback()">测试回调</button>
+        <button onclick="testBroadcast()">测试广播</button>
+    </div>
+    
+    <script>
+        let ws;
+        
+        function connectWebSocket() {
+            const clientId = 'test_client_' + Math.random().toString(36).substr(2, 9);
+            console.log(`尝试连接WebSocket: ws://${window.location.host}/wechat/ws/${clientId}`);
+            
+            ws = new WebSocket(`ws://${window.location.host}/wechat/ws/${clientId}`);
+            
+            ws.onopen = function(e) {
+                console.log('WebSocket连接已建立', e);
+                document.getElementById('connectionStatus').textContent = '已连接';
+                document.getElementById('connectionStatus').style.color = 'green';
+            };
+            
+            ws.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                console.log('收到WebSocket消息:', message);
+                
+                // 显示消息
+                const messageContainer = document.getElementById('messageContainer');
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.innerHTML = `
+                    <div><strong>类型:</strong> ${message.type}</div>
+                    <div><strong>时间:</strong> ${new Date().toLocaleTimeString()}</div>
+                    <div><strong>内容:</strong> <pre>${JSON.stringify(message, null, 2)}</pre></div>
+                `;
+                messageContainer.appendChild(messageElement);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            };
+            
+            ws.onclose = function(event) {
+                console.log('WebSocket连接已关闭');
+                document.getElementById('connectionStatus').textContent = '已断开';
+                document.getElementById('connectionStatus').style.color = 'red';
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket错误:', error);
+                document.getElementById('connectionStatus').textContent = '错误';
+                document.getElementById('connectionStatus').style.color = 'red';
+            };
+        }
+        
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+        
+        // 发送测试消息
+        async function sendTestMessage() {
+            const fromWxid = document.getElementById('testFromWxid').value;
+            const toWxid = document.getElementById('testToWxid').value;
+            const content = document.getElementById('testContent').value;
+            
+            try {
+                const response = await fetch('/wechat/send_test_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        from_wxid: fromWxid,
+                        to_wxid: toWxid,
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('测试消息发送结果:', data);
+                
+                if (data.status === 'success') {
+                    alert('测试消息已发送');
+                } else {
+                    alert(`发送失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('发送测试消息时出错:', error);
+                alert(`发送出错: ${error.message}`);
+            }
+        }
+        
+        // 测试回调
+        async function testCallback() {
+            try {
+                const response = await fetch('/wechat/test_callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        test: 'message',
+                        time: new Date().toISOString()
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('测试回调结果:', data);
+                
+                if (data.status === 'success') {
+                    alert('测试回调成功');
+                } else {
+                    alert(`测试回调失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('测试回调时出错:', error);
+                alert(`测试回调出错: ${error.message}`);
+            }
+        }
+        
+        // 测试广播
+        async function testBroadcast() {
+            try {
+                const response = await fetch('/wechat/test_broadcast');
+                
+                const data = await response.json();
+                console.log('测试广播结果:', data);
+                
+                if (data.status === 'success') {
+                    alert('测试广播成功');
+                } else {
+                    alert(`测试广播失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('测试广播时出错:', error);
+                alert(`测试广播出错: ${error.message}`);
+            }
+        }
+        
+        // 页面加载完成后自动连接WebSocket
+        document.addEventListener('DOMContentLoaded', function() {
+            connectWebSocket();
+        });
+    </script>
+</body>
+</html> 

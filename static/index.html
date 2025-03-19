@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gew</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #07C160;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #ddd;
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #f5f5f5;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-bar {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .contact-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ebebeb;
+            cursor: pointer;
+        }
+        .contact-item:hover {
+            background-color: #f0f0f0;
+        }
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+            background-color: #e0e0e0;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .contact-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .contact-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .contact-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .last-message {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5;
+        }
+        .chat-header {
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            background-color: #fff;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            clear: both;
+        }
+        .message-self {
+            float: right;
+        }
+        .message-other {
+            float: left;
+        }
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 3px;
+            word-break: break-word;
+        }
+        .message-self .message-content {
+            background-color: #95ec69;
+            border-radius: 5px;
+        }
+        .message-other .message-content {
+            background-color: #ffffff;
+            border-radius: 5px;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            clear: both;
+        }
+        .message-self .message-time {
+            text-align: right;
+        }
+        .chat-input {
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            display: flex;
+        }
+        .chat-input textarea {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            resize: none;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            background-color: #07C160;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .login-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-qrcode {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-qrcode h2 {
+            color: #07C160;
+            margin-bottom: 20px;
+        }
+        #qrcodeContainer {
+            margin: 20px 0;
+        }
+        .refresh-button {
+            background-color: #07C160;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* 自定义右键菜单 */
+        .context-menu {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            min-width: 120px;
+            padding: 5px 0;
+        }
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+        .context-menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        .context-menu-item.danger {
+            color: #e53935;
+        }
+        .context-menu-item.danger:hover {
+            background-color: #ffebee;
+        }
+        .message-error {
+            color: #e53935;
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: right;
+        }
+        /* 添加登出按钮样式 */
+        .logout-btn {
+            background-color: #ff4d4f;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .logout-btn:hover {
+            background-color: #ff7875;
+        }
+        
+        /* 调整WebSocket状态样式 */
+        .ws-status {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+    <script src="/static/js/long_polling.js"></script>
+</head>
+<body>
+    <div style="position: fixed; top: 10px; right: 10px; background: #f0f0f0; padding: 5px 10px; border-radius: 5px; z-index: 1000; display: none;">
+        WebSocket状态: <span id="connectionStatus" style="font-weight: bold; color: gray;">未连接</span>
+    </div>
+    <header>
+        <div class="logo">GeWechat 助手</div>
+        <div class="user-info">
+            <div id="logoutBtn" class="logout-btn" style="display: none;">登出</div>
+            <div id="wsStatus" class="ws-status">WebSocket状态: 未连接</div>
+            <div class="avatar"></div>
+            <div id="username">未登录</div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <div class="sidebar">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索联系人...">
+            </div>
+            <div id="contactList" class="contact-list">
+                <!-- 联系人列表将由JavaScript生成 -->
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3 id="currentChat">请选择联系人</h3>
+            </div>
+            <div id="chatMessages" class="chat-messages">
+                <!-- 消息将由JavaScript生成 -->
+            </div>
+            <div class="chat-input">
+                <textarea id="messageInput" placeholder="输入消息..."></textarea>
+                <button id="sendButton">发送</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 微信登录二维码弹窗 -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-qrcode">
+            <h2>微信登录</h2>
+            <p id="loginStatus">正在获取二维码...</p>
+            <div id="qrcodeContainer">
+                <!-- 二维码将在这里显示 -->
+            </div>
+            <button id="refreshQrcode" class="refresh-button">刷新二维码</button>
+        </div>
+    </div>
+
+    <!-- 测试消息发送表单
+    <div class="test-form" style="position: fixed; bottom: 10px; right: 10px; background: #f0f0f0; padding: 10px; border-radius: 5px; z-index: 1000;">
+        <h3>测试消息</h3>
+        <div>
+            <label>发送者ID:</label>
+            <input type="text" id="testFromWxid" value="wxid_sender">
+        </div>
+        <div>
+            <label>接收者ID:</label>
+            <input type="text" id="testToWxid" value="wxid_receiver">
+        </div>
+        <div>
+            <label>消息内容:</label>
+            <input type="text" id="testContent" value="这是一条测试消息">
+        </div>
+        <button onclick="sendTestMessage()">发送测试消息</button>
+    </div> -->
+
+    <!-- 在调试面板中添加 -->
+    <div class="debug-panel" style="display: none;">
+        <button onclick="testDirectMessage()">测试直接显示消息</button>
+        <button onclick="processLastReceivedMessage()">处理最后收到的消息</button>
+        <button onclick="fetchLatestMessages()">获取最新消息</button>
+        <button onclick="resetLastMsgId()">重置lastMsgId</button>
+        <button onclick="completeReset()">完全重置</button>
+        <button onclick="showAllMessages()">显示所有消息</button>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentChatId = '';
+        let contactsData = [];
+        let currentUserWxid = ''; // 当前登录用户的wxid
+        
+        // 在页面加载完成后设置消息处理函数
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成');
+            
+            // 设置消息处理函数
+            messagePoller.onMessage(function(messages) {
+                console.log('收到新消息:', messages);
+                lastReceivedMessage = messages;
+                
+                // 处理每条消息
+                messages.forEach(message => {
+                    // 根据消息类型处理
+                    if (message.type === 'chat_message') {
+                        // 处理聊天消息
+                        const msgData = message.data;
+                        if (msgData) {
+                            handleIncomingMessage(msgData);
+                        } else {
+                            // 如果没有data字段，直接使用消息本身
+                            handleIncomingMessage({
+                                NewMsgId: message.id,
+                                MsgType: message.msg_type,
+                                FromUserName: { string: message.sender },
+                                ToUserName: { string: message.receiver },
+                                Content: { string: message.content },
+                                CreateTime: new Date(message.create_time).getTime() / 1000
+                            });
+                        }
+                    } else if (message.type === 'offline') {
+                        alert(`微信账号 ${message.wxid} 已离线`);
+                    }
+                });
+            });
+            
+            // 检查用户是否已登录
+            checkLoginStatus();
+            
+            // 启动定时轮询
+            messagePoller.startPeriodicPolling();
+            
+            // 更新连接状态
+            document.getElementById('connectionStatus').textContent = '已连接 (定时轮询)';
+            document.getElementById('connectionStatus').style.color = 'green';
+            
+            // 显示调试面板（方便测试）
+            document.querySelector('.debug-panel').style.display = 'block';
+            
+            // 添加登出按钮点击事件
+            document.getElementById('logoutBtn').addEventListener('click', logoutWechat);
+        });
+
+        // 检查登录状态
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/wechat/status');
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.is_logged_in) {
+                    // 用户已登录
+                    currentUserWxid = data.wxid;
+                    console.log('用户已登录:', currentUserWxid);
+                    
+                    // 设置用户ID
+                    messagePoller.setUserId(currentUserWxid);
+                    
+                    // 隐藏登录界面
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    
+                    // 显示登出按钮
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    
+                    // 更新用户名显示
+                    document.getElementById('username').textContent = data.nickname || data.wxid;
+                    
+                    // 加载联系人列表
+                    loadContacts();
+                } else {
+                    // 用户未登录，显示登录界面
+                    console.log('用户未登录，显示登录界面');
+                    document.getElementById('loginOverlay').classList.remove('hidden');
+                    
+                    // 隐藏登出按钮
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    
+                    getLoginQrcode();
+                }
+            } catch (error) {
+                console.error('检查登录状态出错:', error);
+                // 显示登录界面
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                
+                // 隐藏登出按钮
+                document.getElementById('logoutBtn').style.display = 'none';
+                
+                getLoginQrcode();
+            }
+        }
+        
+        // 修改handleLoginSuccess函数，确保登录成功后显示登出按钮
+        function handleLoginSuccess(loginData) {
+            // 保存当前用户信息
+            currentUserWxid = loginData.wxid;
+            console.log('当前登录用户:', currentUserWxid);
+            
+            // 隐藏登录界面
+            document.getElementById('loginOverlay').classList.add('hidden');
+            
+            // 显示登出按钮
+            document.getElementById('logoutBtn').style.display = 'block';
+            
+            // 更新用户名显示
+            document.getElementById('username').textContent = loginData.nickname || loginData.wxid;
+            
+            // 设置用户ID
+            messagePoller.setUserId(currentUserWxid);
+            
+            // 更新连接状态
+            document.getElementById('connectionStatus').textContent = '已连接 (定时轮询)';
+            document.getElementById('connectionStatus').style.color = 'green';
+            
+            // 加载联系人列表
+            loadContacts();
+        }
+        
+        // 修改测试WebSocket连接函数
+        function testWebSocketConnection() {
+            if (messagePoller.isPolling) {
+                console.log('长轮询连接正常');
+                alert('长轮询连接正常');
+            } else {
+                console.error('长轮询未连接');
+                alert('长轮询未连接，尝试重新连接...');
+                messagePoller.startPolling();
+            }
+        }
+        
+        // 修改handleIncomingMessage函数，确保它能处理长轮询接收的消息格式
+        function handleIncomingMessage(message) {
+            console.log('处理收到的消息:', message);
+            
+            try {
+                // 提取消息数据
+                const msgId = message.NewMsgId;
+                const msgType = message.MsgType;
+                const fromUser = message.FromUserName?.string || '';
+                const toUser = message.ToUserName?.string || '';
+                const content = message.Content?.string || '';
+                const createTime = message.CreateTime || Math.floor(Date.now() / 1000);
+                
+                console.log(`消息ID: ${msgId}, 类型: ${msgType}, 发送者: ${fromUser}, 接收者: ${toUser}`);
+                console.log(`消息内容: ${content}`);
+                
+                // 确定聊天对象（如果当前用户是接收者，则聊天对象是发送者；反之亦然）
+                const chatContact = fromUser === currentUserWxid ? toUser : fromUser;
+                
+                // 更新或添加联系人
+                const contactIndex = contactsData.findIndex(c => c.wxid === chatContact);
+                if (contactIndex === -1) {
+                    // 添加新联系人
+                    console.log(`添加新联系人: ${chatContact}`);
+                    const newContact = {
+                        wxid: chatContact,
+                        nickname: chatContact,
+                        avatar: '', // 可以尝试获取联系人头像
+                        lastMessage: content,
+                        lastTime: new Date(createTime * 1000).toLocaleString()
+                    };
+                    contactsData.push(newContact);
+                    
+                    // 使用修改后的函数渲染联系人列表
+                    renderContactList();
+                } else {
+                    // 更新联系人最后消息
+                    console.log(`更新联系人最后消息: ${chatContact}`);
+                    contactsData[contactIndex].lastMessage = content;
+                    contactsData[contactIndex].lastTime = new Date(createTime * 1000).toLocaleString();
+                    
+                    // 更新DOM中的最后消息
+                    const contactElement = document.querySelector(`.contact-item[data-wxid="${chatContact}"]`);
+                    if (contactElement) {
+                        const lastMessageElement = contactElement.querySelector('.last-message');
+                        if (lastMessageElement) {
+                            lastMessageElement.textContent = content;
+                        }
+                    } else {
+                        // 如果DOM中没有找到联系人元素，重新渲染整个列表
+                        renderContactList();
+                    }
+                }
+                
+                // 如果当前正在查看该聊天，则添加消息到聊天区域
+                if (currentChatId === chatContact) {
+                    console.log(`添加消息到当前聊天: ${currentChatId}`);
+                    addMessageToChat(fromUser, content, createTime, msgId);
+                } else {
+                    console.log(`消息不属于当前聊天，当前聊天: ${currentChatId}, 消息聊天: ${chatContact}`);
+                }
+            } catch (error) {
+                console.error('处理消息时出错:', error);
+            }
+        }
+
+        // 添加消息到聊天区域
+        function addMessageToChat(sender, content, timestamp, msgId) {
+            console.log(`添加消息到聊天: sender=${sender}, content=${content}`);
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            // 判断是否是自己发送的消息
+            const isSelf = sender === currentUserWxid;
+            
+            // 设置消息样式
+            messageDiv.className = isSelf ? 'message self' : 'message other';
+            messageDiv.dataset.msgId = msgId;
+            
+            // 格式化时间
+            const messageTime = new Date(timestamp * 1000).toLocaleTimeString();
+            
+            // 设置消息内容
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-text">${content}</div>
+                    <div class="message-time">${messageTime}</div>
+                </div>
+            `;
+            
+            // 添加到聊天区域
+            chatMessages.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('页面加载，开始检查登录状态...');
+                
+                // 直接尝试获取二维码，检查是否已登录
+                const qrResponse = await fetch('/wechat/qrcode', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (qrResponse.ok) {
+                    const qrData = await qrResponse.json();
+                    console.log('二维码请求结果:', qrData);
+                    
+                    // 如果返回"已登录"消息，直接初始化UI
+                    if (qrData.ret === 500 && qrData.msg && qrData.msg.includes('已登录')) {
+                        console.log('从二维码请求检测到已登录状态，初始化UI');
+                        initUI();
+                        return;
+                    }
+                }
+                
+                // 如果二维码请求没有确认已登录，再检查登录状态
+                const response = await fetch('/wechat/login/status', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    console.error('登录状态检查失败，转到登录页');
+                    window.location.href = '/static/qr_login.html';
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('登录状态检查结果:', data);
+                
+                // 如果状态检查确认已登录
+                if (data.data && data.data.status === 2) {
+                    console.log('检测到正常登录状态，初始化UI');
+                    initUI();
+                    return;
+                }
+                
+                // 其他情况都视为未登录
+                console.log('未检测到有效登录状态，转到登录页');
+                window.location.href = '/static/qr_login.html';
+                
+            } catch (error) {
+                console.error('检查登录状态出错:', error);
+                window.location.href = '/static/qr_login.html';
+            }
+            
+            // 添加右键菜单到 DOM
+            const contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu';
+            contextMenu.innerHTML = `
+                <div class="context-menu-item" data-action="view-profile">查看资料</div>
+                <div class="context-menu-item danger" data-action="delete-contact">删除联系人</div>
+            `;
+            document.body.appendChild(contextMenu);
+            
+            // 禁用整个文档的默认右键菜单
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            
+            // 点击文档任意位置关闭右键菜单
+            document.addEventListener('click', function() {
+                contextMenu.style.display = 'none';
+            });
+            
+            // 连接WebSocket
+            connectWebSocket();
+        });
+        
+        // 初始化UI
+        async function initUI() {
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('username').textContent = '加载中...';
+            
+            // 添加右键菜单到 DOM
+            const contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu';
+            contextMenu.innerHTML = `
+                <div class="context-menu-item" data-action="view-profile">查看资料</div>
+                <div class="context-menu-item danger" data-action="delete-contact">删除联系人</div>
+            `;
+            document.body.appendChild(contextMenu);
+            
+            // 禁用整个文档的默认右键菜单
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            
+            // 点击文档任意位置关闭右键菜单
+            document.addEventListener('click', function() {
+                contextMenu.style.display = 'none';
+            });
+            
+            // 设置右键菜单
+            setupContactContextMenu();
+            
+            // 获取用户信息
+            try {
+                const response = await fetch('/wechat/user', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.wxid) {
+                        // 更新用户信息
+                        document.getElementById('username').textContent = data.nickname || data.wxid || "微信用户";
+                        // 关闭登录弹窗
+                        document.getElementById('loginOverlay').classList.add('hidden');
+                        // 加载联系人列表
+                        loadContacts();
+                        return;
+                    }
+                }
+                
+                // 如果没有获取到用户信息，初始化微信登录
+                await initWechatLogin();
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
+                // 如果获取用户信息失败，初始化微信登录
+                await initWechatLogin();
+            }
+            
+            // 绑定发送按钮点击事件
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
+            
+            // 绑定输入框回车键事件
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // 阻止默认的换行行为
+                    sendMessage();
+                }
+            });
+        }
+        
+        // 初始化微信登录
+        async function initWechatLogin() {
+            try {
+                const statusElement = document.getElementById('loginStatus');
+                statusElement.textContent = '正在准备登录...';
+                
+                // 显示登录弹窗
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                
+                // 获取二维码
+                const qrCodeResult = await fetchQRCode();
+                
+                // 如果二维码获取成功且不是已登录状态，开始轮询登录状态
+                if (qrCodeResult === true) {
+                    // 添加刷新按钮事件
+                    document.getElementById('refreshQrcode').addEventListener('click', async function() {
+                        statusElement.textContent = '正在刷新二维码...';
+                        await fetchQRCode();
+                        startLoginCheck();
+                    });
+                    
+                    // 开始轮询登录状态
+                    startLoginCheck();
+                }
+            } catch (error) {
+                console.error('初始化微信登录出错:', error);
+                document.getElementById('loginStatus').textContent = '登录系统初始化失败，请刷新页面';
+            }
+        }
+        
+        // 获取登录二维码
+        async function fetchQRCode() {
+            try {
+                const response = await fetch('/wechat/qrcode', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('获取二维码失败');
+                }
+                
+                const data = await response.json();
+                
+                // 处理已登录情况
+                if (data.ret === 500 && data.msg && data.msg.includes('已登录')) {
+                    console.log('检测到已登录状态，准备加载主页面');
+                    document.getElementById('loginStatus').textContent = '已检测到登录，正在加载...';
+                    
+                    // 关闭登录弹窗，进入主页面
+                    setTimeout(() => {
+                        document.getElementById('loginOverlay').classList.add('hidden');
+                        // 加载联系人列表
+                        loadContacts();
+                    }, 1000);
+                    
+                    return true;
+                }
+                
+                // 正常显示二维码的情况
+                if (data.data && data.data.qrImgBase64) {
+                    // 显示二维码图片
+                    document.getElementById('qrcodeContainer').innerHTML = `
+                        <img src="${data.data.qrImgBase64}" alt="登录二维码" style="width: 200px; height: 200px;">
+                    `;
+                    document.getElementById('loginStatus').textContent = '请使用微信扫描二维码';
+                    return true;
+                } else {
+                    throw new Error('二维码数据无效');
+                }
+            } catch (error) {
+                console.error('获取二维码出错:', error);
+                document.getElementById('qrcodeContainer').innerHTML = '获取二维码失败，请点击刷新按钮重试';
+                return false;
+            }
+        }
+        
+        // 轮询检查登录状态
+        function startLoginCheck() {
+            const statusElement = document.getElementById('loginStatus');
+            let checkCount = 0;
+            
+            const loginCheckInterval = setInterval(async () => {
+                try {
+                    checkCount++;
+                    // 最多检查30次（约90秒）
+                    if (checkCount > 30) {
+                        clearInterval(loginCheckInterval);
+                        statusElement.textContent = '登录超时，请刷新二维码';
+                        document.getElementById('refreshQrcode').style.display = 'block';
+                        return;
+                    }
+                    
+                    const response = await fetch('/wechat/login/status', {
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('检查登录状态失败');
+                    }
+                    
+                    const data = await response.json();
+                    console.log('登录状态检查结果:', data);
+                    
+                    // 处理已登录情况（从错误消息中检测）
+                    if (data.ret === 500 && data.msg && data.msg.includes('已登录')) {
+                        statusElement.textContent = '已检测到登录，正在加载...';
+                        clearInterval(loginCheckInterval);
+                        
+                        // 关闭登录弹窗，进入主页面
+                        setTimeout(() => {
+                            document.getElementById('loginOverlay').classList.add('hidden');
+                            // 加载联系人列表
+                            loadContacts();
+                        }, 1000);
+                        return;
+                    }
+                    
+                    // 处理二维码过期情况
+                    if (data.ret === 500 && data.msg && data.msg.includes('已过期')) {
+                        statusElement.textContent = '二维码已过期，请刷新';
+                        clearInterval(loginCheckInterval);
+                        document.getElementById('refreshQrcode').style.display = 'block';
+                        return;
+                    }
+                    
+                    // 正常登录状态处理
+                    if (data.ret === 200 && data.data) {
+                        // 根据状态更新提示
+                        if (data.data.status === 2) { // 已登录成功
+                            statusElement.textContent = '登录成功，正在加载...';
+                            clearInterval(loginCheckInterval);
+                            
+                            // 更新用户信息（如果有）
+                            if (data.data.loginInfo && data.data.loginInfo.wxid) {
+                                document.getElementById('username').textContent = 
+                                    data.data.loginInfo.nickName || data.data.loginInfo.wxid || "微信用户";
+                            }
+                            
+                            // 关闭登录弹窗
+                            setTimeout(() => {
+                                document.getElementById('loginOverlay').classList.add('hidden');
+                                // 加载联系人列表
+                                loadContacts();
+                            }, 1000);
+                        } else if (data.data.status === 0) { // 等待扫码
+                            statusElement.textContent = '请使用微信扫描二维码';
+                        } else if (data.data.status === 1) { // 已扫码，等待确认
+                            statusElement.textContent = '扫码成功，请在手机上确认登录';
+                        } else if (data.data.status === 3) { // 二维码过期
+                            statusElement.textContent = '二维码已过期，请刷新';
+                            clearInterval(loginCheckInterval);
+                            document.getElementById('refreshQrcode').style.display = 'block';
+                        }
+                    }
+                } catch (error) {
+                    console.error('检查登录状态出错:', error);
+                    // 不要因为单次错误就停止检查
+                    statusElement.textContent = '检查登录状态中...';
+                }
+            }, 3000);
+        }
+        
+        // 加载联系人列表
+        async function loadContacts() {
+            try {
+                const response = await fetch('/wechat/contacts', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    console.error(`获取联系人失败: ${response.status} ${response.statusText}`);
+                    
+                    // 显示友好的错误消息并提供模拟数据选项
+                    const contactList = document.getElementById('contactList');
+                    contactList.innerHTML = `
+                        <div class="error-message">
+                            <p>加载联系人失败</p>
+                            <p>错误: ${response.status} ${response.statusText}</p>
+                            <button onclick="loadContacts()">重试</button>
+                            <button onclick="loadMockContacts()">加载模拟数据</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.contacts && Array.isArray(data.contacts)) {
+                    contactsData = data.contacts;
+                    const contactList = document.getElementById('contactList');
+                    contactList.innerHTML = '';
+                    
+                    if (contactsData.length === 0) {
+                        contactList.innerHTML = '<div class="empty-message">没有联系人</div>';
+                        return;
+                    }
+                    
+                    // 先显示基本联系人列表
+                    contactsData.forEach(contact => {
+                        const contactItem = document.createElement('div');
+                        contactItem.className = 'contact-item';
+                        contactItem.dataset.wxid = contact.wxid;
+                        contactItem.innerHTML = `
+                            <div class="contact-avatar"></div>
+                            <div class="contact-info">
+                                <div class="contact-name">${contact.wxid}</div>
+                                <div class="last-message"></div>
+                            </div>
+                        `;
+                        
+                        contactItem.addEventListener('click', () => selectContact(contact.wxid));
+                        contactList.appendChild(contactItem);
+                    });
+                    
+                    // 然后异步获取联系人详细信息
+                    updateContactsInfo(contactsData.map(c => c.wxid));
+                } else {
+                    throw new Error('联系人数据格式错误');
+                }
+            } catch (error) {
+                console.error('加载联系人出错:', error);
+                
+                // 显示友好的错误消息并提供模拟数据选项
+                const contactList = document.getElementById('contactList');
+                contactList.innerHTML = `
+                    <div class="error-message">
+                        <p>加载联系人失败</p>
+                        <p>错误: ${error.message}</p>
+                        <button onclick="loadContacts()">重试</button>
+                        <button onclick="loadMockContacts()">加载模拟数据</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // 异步更新联系人信息（昵称和头像）
+        async function updateContactsInfo(wxids) {
+            try {
+                if (!wxids || wxids.length === 0) return;
+                
+                // 每次最多请求50个联系人信息
+                const batchSize = 50;
+                
+                for (let i = 0; i < wxids.length; i += batchSize) {
+                    const batchWxids = wxids.slice(i, i + batchSize);
+                    
+                    const response = await fetch('/wechat/contacts/brief', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(batchWxids),
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        console.error(`获取联系人详情失败: ${response.status} ${response.statusText}`);
+                        continue;
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.contacts && Array.isArray(data.contacts)) {
+                        // 更新联系人信息
+                        data.contacts.forEach(contactInfo => {
+                            if (!contactInfo.userName) return;
+                            
+                            // 找到对应的联系人元素
+                            const contactItem = document.querySelector(`.contact-item[data-wxid="${contactInfo.userName}"]`);
+                            if (!contactItem) return;
+                            
+                            // 更新昵称
+                            const nameElement = contactItem.querySelector('.contact-name');
+                            if (nameElement) {
+                                nameElement.textContent = contactInfo.nickName || contactInfo.userName;
+                            }
+                            
+                            // 更新头像
+                            const avatarElement = contactItem.querySelector('.contact-avatar');
+                            if (avatarElement && contactInfo.smallHeadImgUrl) {
+                                avatarElement.style.backgroundImage = `url('${contactInfo.smallHeadImgUrl}')`;
+                                avatarElement.style.backgroundSize = 'cover';
+                            }
+                            
+                            // 更新全局联系人数据
+                            const contactData = contactsData.find(c => c.wxid === contactInfo.userName);
+                            if (contactData) {
+                                contactData.nickname = contactInfo.nickName;
+                                contactData.avatar = contactInfo.smallHeadImgUrl;
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('更新联系人信息出错:', error);
+            }
+        }
+        
+        // 加载模拟联系人数据
+        function loadMockContacts() {
+            const mockContacts = [
+                { wxid: 'wxid_001', nickname: '张三', lastMessage: '你好啊！' },
+                { wxid: 'wxid_002', nickname: '李四', lastMessage: '明天见面讨论项目' },
+                { wxid: 'wxid_003', nickname: '王五', lastMessage: '收到文件了吗？' },
+                { wxid: 'wxid_004', nickname: '技术群', lastMessage: '[有人@你] 请查看最新更新' },
+                { wxid: 'wxid_005', nickname: '家人群', lastMessage: '妈妈: 晚上回来吃饭吗？' }
+            ];
+            
+            contactsData = mockContacts;
+            const contactList = document.getElementById('contactList');
+            contactList.innerHTML = '';
+            
+            contactsData.forEach(contact => {
+                const contactItem = document.createElement('div');
+                contactItem.className = 'contact-item';
+                contactItem.dataset.wxid = contact.wxid;
+                contactItem.innerHTML = `
+                    <div class="contact-avatar"></div>
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.nickname || contact.wxid}</div>
+                        <div class="last-message">${contact.lastMessage || ''}</div>
+                    </div>
+                `;
+                
+                contactItem.addEventListener('click', () => selectContact(contact.wxid));
+                contactList.appendChild(contactItem);
+            });
+            
+            // 添加提示信息
+            const notice = document.createElement('div');
+            notice.className = 'mock-data-notice';
+            notice.innerHTML = '当前显示的是模拟数据，API接口修复后将显示真实数据';
+            contactList.prepend(notice);
+        }
+        
+        // 选择联系人
+        function selectContact(wxid) {
+            currentChatId = wxid;
+            
+            // 更新选中状态
+            const contactItems = document.querySelectorAll('.contact-item');
+            contactItems.forEach(item => {
+                if (item.dataset.wxid === wxid) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // 更新聊天标题
+            const contact = contactsData.find(c => c.wxid === wxid);
+            document.getElementById('currentChat').textContent = contact ? contact.nickname || wxid : wxid;
+            
+            // 清空聊天区域
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            // 加载聊天记录
+            loadMessages(wxid);
+        }
+        
+        // 加载消息记录
+        async function loadMessages(wxid) {
+            // 这里应该从后端获取消息记录
+            // 暂时使用模拟数据
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message message-other">
+                    <div class="message-content">你好，这是一条模拟消息</div>
+                    <div class="message-time">14:25</div>
+                </div>
+                <div class="message message-self">
+                    <div class="message-content">你好，这是回复消息</div>
+                    <div class="message-time">14:26</div>
+                </div>
+            `;
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+            
+            if (!content || !currentChatId) return;
+            
+            // 清空输入框
+            messageInput.value = '';
+            
+            // 获取当前时间
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 在聊天区域添加消息
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message message-self';
+            messageElement.innerHTML = `
+                <div class="message-content">${content}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            chatMessages.appendChild(messageElement);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 发送消息到服务器
+            try {
+                const formData = new FormData();
+                formData.append('to_wxid', currentChatId);
+                formData.append('content', content);
+                
+                console.log('发送消息:', { to_wxid: currentChatId, content });
+                
+                const response = await fetch('/wechat/message/text', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP错误 ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('消息发送结果:', result);
+                
+                if (result.status !== 'success') {
+                    throw new Error(result.message || '消息发送失败');
+                }
+            } catch (error) {
+                console.error('发送消息出错:', error);
+                
+                // 显示发送失败提示
+                const errorElement = document.createElement('div');
+                errorElement.className = 'message-error';
+                errorElement.textContent = '发送失败';
+                messageElement.appendChild(errorElement);
+            }
+        }
+
+        // 添加右键菜单处理函数
+        function setupContactContextMenu() {
+            const contactList = document.getElementById('contactList');
+            const contextMenu = document.querySelector('.context-menu');
+            
+            // 如果元素不存在，直接返回
+            if (!contactList || !contextMenu) {
+                console.error('联系人列表或右键菜单元素不存在');
+                return;
+            }
+            
+            // 当前右键选中的联系人
+            let selectedContactWxid = null;
+            
+            // 为联系人列表添加右键菜单事件
+            contactList.addEventListener('contextmenu', function(e) {
+                // 查找被右键点击的联系人元素
+                let contactItem = e.target;
+                while (contactItem && !contactItem.classList.contains('contact-item')) {
+                    contactItem = contactItem.parentElement;
+                    if (!contactItem || contactItem === contactList) {
+                        contactItem = null;
+                        break;
+                    }
+                }
+                
+                // 如果找到联系人元素，显示右键菜单
+                if (contactItem) {
+                    e.preventDefault();
+                    
+                    // 保存当前选中的联系人wxid
+                    selectedContactWxid = contactItem.dataset.wxid;
+                    
+                    // 设置右键菜单位置
+                    contextMenu.style.left = `${e.pageX}px`;
+                    contextMenu.style.top = `${e.pageY}px`;
+                    contextMenu.style.display = 'block';
+                }
+            });
+            
+            // 处理右键菜单项点击
+            contextMenu.addEventListener('click', function(e) {
+                const action = e.target.dataset.action;
+                
+                if (!action || !selectedContactWxid) return;
+                
+                switch (action) {
+                    case 'view-profile':
+                        // 查看联系人资料
+                        alert(`查看联系人资料: ${selectedContactWxid}`);
+                        break;
+                        
+                    case 'delete-contact':
+                        // 删除联系人
+                        if (confirm(`确定要删除联系人 ${selectedContactWxid} 吗？`)) {
+                            deleteContact(selectedContactWxid).catch(error => {
+                                console.error('删除联系人失败:', error);
+                                alert(`删除联系人失败: ${error.message}`);
+                            });
+                        }
+                        break;
+                }
+                
+                // 隐藏右键菜单
+                contextMenu.style.display = 'none';
+            });
+        }
+
+        // 删除联系人的函数
+        async function deleteContact(wxid) {
+            try {
+                const response = await fetch('/wechat/contacts/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ wxid }),
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP错误 ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // 从DOM中移除联系人
+                    const contactItem = document.querySelector(`.contact-item[data-wxid="${wxid}"]`);
+                    if (contactItem) {
+                        contactItem.remove();
+                    }
+                    
+                    // 从contactsData中移除联系人
+                    const index = contactsData.findIndex(c => c.wxid === wxid);
+                    if (index !== -1) {
+                        contactsData.splice(index, 1);
+                    }
+                    
+                    // 如果当前选中的是被删除的联系人，清空聊天区域
+                    if (currentChatId === wxid) {
+                        currentChatId = '';
+                        document.getElementById('currentChat').textContent = '请选择联系人';
+                        document.getElementById('chatMessages').innerHTML = '';
+                    }
+                    
+                    alert(`联系人 ${wxid} 已删除`);
+                } else {
+                    throw new Error(data.message || '删除联系人失败');
+                }
+            } catch (error) {
+                console.error('删除联系人出错:', error);
+                throw error;
+            }
+        }
+
+        // 发送测试消息
+        async function sendTestMessage() {
+            const fromWxid = document.getElementById('testFromWxid').value;
+            const toWxid = document.getElementById('testToWxid').value;
+            const content = document.getElementById('testContent').value;
+            
+            try {
+                const response = await fetch('/wechat/send_test_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        from_wxid: fromWxid,
+                        to_wxid: toWxid,
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('测试消息发送结果:', data);
+                
+                if (data.status === 'success') {
+                    alert('测试消息已发送');
+                } else {
+                    alert(`发送失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('发送测试消息时出错:', error);
+                alert(`发送出错: ${error.message}`);
+            }
+        }
+
+        // 添加测试函数
+        function testDirectMessage() {
+            // 创建一个测试消息
+            const testMessage = {
+                "NewMsgId": Date.now(),
+                "MsgType": 1,
+                "FromUserName": {"string": "wxid_test_sender"},
+                "ToUserName": {"string": currentUserWxid || "wxid_test_receiver"},
+                "Content": {"string": "这是一条测试消息 " + new Date().toLocaleTimeString()},
+                "CreateTime": Math.floor(Date.now() / 1000)
+            };
+            
+            // 直接调用消息处理函数
+            handleIncomingMessage(testMessage);
+            
+            console.log('已直接显示测试消息');
+        }
+
+        // 添加处理最后收到消息的函数
+        let lastReceivedMessage = null;
+        
+        function processLastReceivedMessage() {
+            if (lastReceivedMessage) {
+                console.log('手动处理最后收到的消息:', lastReceivedMessage);
+                
+                // 处理每条消息
+                lastReceivedMessage.forEach(message => {
+                    if (message.type === 'chat_message') {
+                        const msgData = message.data;
+                        if (msgData) {
+                            handleIncomingMessage(msgData);
+                        } else {
+                            handleIncomingMessage({
+                                NewMsgId: message.id,
+                                MsgType: message.msg_type,
+                                FromUserName: { string: message.sender },
+                                ToUserName: { string: message.receiver },
+                                Content: { string: message.content },
+                                CreateTime: new Date(message.create_time).getTime() / 1000
+                            });
+                        }
+                    }
+                });
+            } else {
+                console.log('没有最后收到的消息可处理');
+            }
+        }
+
+        // 按Ctrl+Shift+D显示调试面板
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                const debugPanel = document.querySelector('.debug-panel');
+                debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // 修改 renderContactList 函数
+        function renderContactList() {
+            console.log('渲染联系人列表');
+            
+            const contactList = document.getElementById('contactList');
+            // 清空现有列表
+            contactList.innerHTML = '';
+            
+            // 按最后消息时间排序（最新的在前面）
+            const sortedContacts = [...contactsData].sort((a, b) => {
+                const timeA = a.lastTime ? new Date(a.lastTime).getTime() : 0;
+                const timeB = b.lastTime ? new Date(b.lastTime).getTime() : 0;
+                return timeB - timeA;
+            });
+            
+            // 添加每个联系人
+            sortedContacts.forEach(contact => {
+                const contactElement = document.createElement('div');
+                contactElement.className = 'contact-item';
+                contactElement.setAttribute('data-wxid', contact.wxid);
+                
+                if (contact.wxid === currentChatId) {
+                    contactElement.classList.add('active');
+                }
+                
+                // 使用与原始结构一致的HTML
+                const avatarStyle = contact.avatar 
+                    ? `background-image: url("${contact.avatar}"); background-size: cover;` 
+                    : '';
+                
+                contactElement.innerHTML = `
+                    <div class="contact-avatar" style="${avatarStyle}"></div>
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.nickname || contact.wxid}</div>
+                        <div class="last-message">${contact.lastMessage || ''}</div>
+                    </div>
+                `;
+                
+                // 点击联系人切换聊天
+                contactElement.addEventListener('click', () => {
+                    // 移除其他联系人的活跃状态
+                    document.querySelectorAll('.contact-item.active').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // 设置当前联系人为活跃状态
+                    contactElement.classList.add('active');
+                    
+                    // 切换到该联系人的聊天
+                    switchChat(contact.wxid);
+                });
+                
+                contactList.appendChild(contactElement);
+            });
+        }
+
+        // 添加 switchChat 函数（如果尚未定义）
+        function switchChat(wxid) {
+            if (currentChatId === wxid) {
+                return; // 已经在当前聊天，无需切换
+            }
+            
+            currentChatId = wxid;
+            
+            // 更新聊天标题
+            const contact = contactsData.find(c => c.wxid === wxid);
+            document.getElementById('currentChat').textContent = contact ? (contact.nickname || wxid) : wxid;
+            
+            // 清空聊天消息区域
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            // 这里可以加载历史消息
+            loadChatHistory(wxid);
+        }
+
+        // 添加 loadChatHistory 函数（如果尚未定义）
+        async function loadChatHistory(wxid) {
+            console.log(`加载与 ${wxid} 的聊天历史`);
+            
+            try {
+                // 构建请求URL
+                const url = `/api/messages/history?user_id=${currentUserWxid}&chat_id=${wxid}`;
+                
+                // 发送请求
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.messages && data.messages.length > 0) {
+                    console.log(`加载了 ${data.messages.length} 条历史消息`);
+                    
+                    // 处理每条消息
+                    data.messages.forEach(message => {
+                        // 根据消息类型处理
+                        if (message.type === 'chat_message') {
+                            const msgData = message.data;
+                            const sender = message.sender;
+                            const content = message.content;
+                            const createTime = new Date(message.create_time).getTime() / 1000;
+                            const msgId = message.id;
+                            
+                            // 添加消息到聊天区域
+                            addMessageToChat(sender, content, createTime, msgId);
+                        }
+                    });
+                } else {
+                    console.log('没有历史消息');
+                }
+            } catch (error) {
+                console.error('加载聊天历史出错:', error);
+            }
+        }
+
+        // 添加获取最新消息的函数
+        async function fetchLatestMessages() {
+            console.log('手动获取最新消息');
+            
+            try {
+                // 不使用last_msg_id参数，获取所有消息
+                const url = `/api/messages/fetch?user_id=${currentUserWxid}`;
+                
+                console.log(`发送请求: ${url}`);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('收到响应:', data);
+                
+                if (data.messages && data.messages.length > 0) {
+                    console.log(`收到 ${data.messages.length} 条消息`);
+                    
+                    // 处理每条消息
+                    data.messages.forEach(message => {
+                        if (message.type === 'chat_message') {
+                            const msgData = message.data;
+                            if (msgData) {
+                                handleIncomingMessage(msgData);
+                            } else {
+                                handleIncomingMessage({
+                                    NewMsgId: message.id,
+                                    MsgType: message.msg_type,
+                                    FromUserName: { string: message.sender },
+                                    ToUserName: { string: message.receiver },
+                                    Content: { string: message.content },
+                                    CreateTime: new Date(message.create_time).getTime() / 1000
+                                });
+                            }
+                        }
+                    });
+                    
+                    // 更新最后消息ID
+                    const lastMessage = data.messages[data.messages.length - 1];
+                    if (lastMessage.id) {
+                        console.log(`更新lastMsgId: ${messagePoller.lastMsgId} -> ${lastMessage.id}`);
+                        messagePoller.setLastMsgId(lastMessage.id);
+                    }
+                } else {
+                    console.log('没有消息');
+                }
+            } catch (error) {
+                console.error('获取消息出错:', error);
+            }
+        }
+        
+        // 添加重置lastMsgId的函数
+        function resetLastMsgId() {
+            console.log(`重置lastMsgId: ${messagePoller.lastMsgId} -> null`);
+            messagePoller.setLastMsgId(null);
+            alert('已重置lastMsgId，下次轮询将获取所有消息');
+        }
+
+        // 添加完全重置函数
+        function completeReset() {
+            messagePoller.stopPeriodicPolling();
+            messagePoller.lastMsgId = null;
+            messagePoller.lastMsgTime = null;
+            messagePoller.userId = currentUserWxid;
+            messagePoller.startPeriodicPolling();
+            console.log('已完全重置轮询状态');
+            alert('已完全重置轮询状态，将获取所有消息');
+        }
+        
+        // 添加显示所有消息函数
+        async function showAllMessages() {
+            console.log('获取并显示所有消息');
+            
+            try {
+                // 不使用任何过滤条件，获取所有消息
+                const url = `/api/messages/all`;
+                
+                console.log(`发送请求: ${url}`);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('收到所有消息:', data);
+                
+                if (data.messages && data.messages.length > 0) {
+                    console.log(`共有 ${data.messages.length} 条消息`);
+                    
+                    // 在控制台显示所有消息
+                    data.messages.forEach((msg, index) => {
+                        console.log(`消息 ${index+1}:`, msg);
+                    });
+                    
+                    alert(`共有 ${data.messages.length} 条消息，详情请查看控制台`);
+                } else {
+                    console.log('没有消息');
+                    alert('数据库中没有消息');
+                }
+            } catch (error) {
+                console.error('获取所有消息出错:', error);
+                alert(`获取所有消息出错: ${error.message}`);
+            }
+        }
+
+        // 添加登出函数
+        async function logoutWechat() {
+            if (!confirm('确定要登出微信账号吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/wechat/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert('成功登出微信账号');
+                    // 重新加载页面或更新UI状态
+                    window.location.reload();
+                } else {
+                    alert(`登出失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('登出时出错:', error);
+                alert(`登出出错: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

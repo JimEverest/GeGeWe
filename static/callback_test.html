@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回调测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>回调测试</h1>
+    
+    <div class="form-group">
+        <label for="callbackUrl">回调URL:</label>
+        <input type="text" id="callbackUrl" value="https://c260-172-235-216-15.ngrok-free.app/wechat/callback">
+    </div>
+    
+    <div class="form-group">
+        <label for="appId">应用ID:</label>
+        <input type="text" id="appId" value="wx_1Evjqp0uqLMBC8HLZFyX0">
+    </div>
+    
+    <div class="form-group">
+        <label for="wxid">微信ID:</label>
+        <input type="text" id="wxid" value="wxid_example">
+    </div>
+    
+    <div class="form-group">
+        <label for="fromUser">发送者ID:</label>
+        <input type="text" id="fromUser" value="wxid_sender">
+    </div>
+    
+    <div class="form-group">
+        <label for="toUser">接收者ID:</label>
+        <input type="text" id="toUser" value="wxid_receiver">
+    </div>
+    
+    <div class="form-group">
+        <label for="content">消息内容:</label>
+        <textarea id="content" rows="3">这是一条测试消息</textarea>
+    </div>
+    
+    <button onclick="sendTestCallback()">发送测试回调</button>
+    
+    <div class="result" id="result">
+        <p>结果将显示在这里...</p>
+    </div>
+    
+    <script>
+        async function sendTestCallback() {
+            const callbackUrl = document.getElementById('callbackUrl').value;
+            const appId = document.getElementById('appId').value;
+            const wxid = document.getElementById('wxid').value;
+            const fromUser = document.getElementById('fromUser').value;
+            const toUser = document.getElementById('toUser').value;
+            const content = document.getElementById('content').value;
+            
+            const payload = {
+                "TypeName": "AddMsg",
+                "Appid": appId,
+                "Wxid": wxid,
+                "Data": {
+                    "MsgId": 1040356095,
+                    "FromUserName": {
+                        "string": fromUser
+                    },
+                    "ToUserName": {
+                        "string": toUser
+                    },
+                    "MsgType": 1,
+                    "Content": {
+                        "string": content
+                    },
+                    "CreateTime": Math.floor(Date.now() / 1000),
+                    "NewMsgId": Date.now()
+                }
+            };
+            
+            try {
+                const response = await fetch(callbackUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>响应状态: ${response.status}</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>错误</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 
